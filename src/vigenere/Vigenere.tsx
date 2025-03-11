@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 const VigenereCipher = () => {
-   const [alphabet, setAlphabet] = useState('ABC')
+   const [alphabet, setAlphabet] = useState('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
    const [plaintext, setPlaintext] = useState('')
    const [key, setKey] = useState('')
    const [encryptedText, setEncryptedText] = useState('')
