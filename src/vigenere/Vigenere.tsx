@@ -12,28 +12,51 @@ const VigenereCipher = () => {
       let newAlphabet = e.target.value.replace(/\s/g, '')
       if (new Set(newAlphabet).size === newAlphabet.length) {
          setAlphabet(newAlphabet)
+         setError('') 
+      } else {
+         setError('Alphabet không được chứa kí tự trùng lặp')
       }
    }
 
-   const filterValidChars = (input: string) => {
-      return input
-         .split('')
-         .filter((char) => alphabet.includes(char))
-         .join('')
+   const isValidInputPlainText = (input: string) => {
+      return input.split('').every((char) => alphabet.includes(char) || char === ' ')
    }
-
-   const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setKey(filterValidChars(e.target.value))
+   const isValidInputKey = (input: string) => {
+      return input.split('').every((char) => alphabet.includes(char))
    }
 
    const handlePlainTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPlaintext(filterValidChars(e.target.value))
+      const input = e.target.value
+      if (isValidInputPlainText(input)) {
+         setPlaintext(input)
+         setError('')
+      } else {
+         setError('Plaintext chứa kí tự không thuộc alphabet')
+      }
+   }
+
+   const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const input = e.target.value
+      if (isValidInputKey(input)) {
+         setKey(input)
+         setError('')
+      } else {
+         setError('Key chứa kí tự không thuộc alphabet')
+      }
    }
 
    const repeatKey = (key: string, text: string) => {
-      let res = key
-      while (res.length < text.length) res += key
-      return res.substring(0, text.length)
+      let res = ''
+      let keyIndex = 0
+      for (let char of text) {
+         if (char !== ' ') {
+            res += key[keyIndex % key.length]
+            keyIndex++
+         } else {
+            res += ' '
+         }
+      }
+      return res
    }
 
    const handleEncrypt = (e: React.FormEvent) => {
@@ -46,15 +69,22 @@ const VigenereCipher = () => {
          setError('Vui lòng nhập đầy đủ plaintext và key')
          return
       }
+      if (!isValidInputPlainText(plaintext) || !isValidInputKey(key)) {
+         setError('Plaintext hoặc key chứa kí tự không hợp lệ')
+         return
+      }
       setError('')
       const alpMap = Object.fromEntries([...alphabet].map((c, i) => [c, i]))
       const rpKey = repeatKey(key, plaintext)
       const encrypted = plaintext
          .split('')
-         .map(
-            (char, i) =>
-               alphabet[(alpMap[char] + alpMap[rpKey[i]]) % alphabet.length]
-         )
+         .map((char, i) => {
+            if (char === ' ') {
+               return ' '
+            } else {
+               return alphabet[(alpMap[char] + alpMap[rpKey[i]]) % alphabet.length]
+            }
+         })
          .join('')
       setEncryptedText(encrypted)
    }
@@ -64,26 +94,44 @@ const VigenereCipher = () => {
          setError('Vui lòng nhập Alphabet trước khi giải mã')
          return
       }
+      if (!encryptedText || !key) {
+         setError('Vui lòng nhập đầy đủ encrypted text và key')
+         return
+      }
+      if (!isValidInputPlainText(encryptedText) || !isValidInputKey(key)) {
+         setError('Encrypted text hoặc key chứa kí tự không hợp lệ')
+         return
+      }
+      setError('')
       const alpMap = Object.fromEntries([...alphabet].map((c, i) => [c, i]))
       const rpKey = repeatKey(key, encryptedText)
       const decrypted = encryptedText
          .split('')
-         .map(
-            (char, i) =>
-               alphabet[
-                  (alpMap[char] - alpMap[rpKey[i]] + alphabet.length) %
-                     alphabet.length
+         .map((char, i) => {
+            if (char === ' ') {
+               return ' '
+            } else {
+               return alphabet[
+                  (alpMap[char] - alpMap[rpKey[i]] + alphabet.length) % alphabet.length
                ]
-         )
+            }
+         })
          .join('')
       setDecryptedText(decrypted)
    }
 
    return (
+      
       <div className="flex h-screen items-center justify-center">
          <div className="w-2/3 rounded-lg bg-white p-[50px] shadow-xl">
+         <div className="mb-6 flex justify-center">
+         <img
+            src =" .\src\assets\images\paw-tuah-paw.gif"
+            alt="Mô tả ảnh"
+            className="h-auto w-1/2" 
+         />
+      </div>
             <div className="grid grid-cols-2 gap-8">
-               {/* Cột Nhập Liệu */}
                <form className="space-y-6" onSubmit={handleEncrypt}>
                   <div>
                      <label className="block text-lg font-semibold">Alphabet</label>
@@ -121,7 +169,6 @@ const VigenereCipher = () => {
                   {error && <div className="text-sm text-red-500">{error}</div>}
                </form>
 
-               {/* Cột Mã Hóa & Giải Mã */}
                <div className="space-y-6">
                   <div>
                      <label className="block text-lg font-semibold">Mã Hóa</label>
