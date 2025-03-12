@@ -58,7 +58,6 @@ const VigenereCipher = () => {
       }
       return res
    }
-
    const handleEncrypt = (e: React.FormEvent) => {
       e.preventDefault()
       if (!alphabet) {
@@ -125,11 +124,6 @@ const VigenereCipher = () => {
       <div className="flex h-screen items-center justify-center">
          <div className="w-2/3 rounded-lg bg-white p-[50px] shadow-xl">
          <div className="mb-6 flex justify-center">
-         <img
-            src =" .\src\assets\images\paw-tuah-paw.gif"
-            alt="Mô tả ảnh"
-            className="h-auto w-1/2" 
-         />
       </div>
             <div className="grid grid-cols-2 gap-8">
                <form className="space-y-6" onSubmit={handleEncrypt}>
